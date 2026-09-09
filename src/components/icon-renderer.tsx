@@ -1,38 +1,46 @@
 import { Icon as IconifyIcon } from "@iconify/react"
-import type { CSSProperties, MouseEventHandler, ReactNode } from "react"
+import type { ReactNode, SVGProps } from "react"
 import { resolveIcon } from "@/lib/resolve-icon"
 
-export interface IconRendererProps {
-  /** Référence : "lucide:coffee", "heroicons:home", "custom:my-logo" */
+type IconRendererSvgProps = Omit<
+  SVGProps<SVGSVGElement>,
+  "ref" | "mode" | "onLoad" | "rotate" | "width" | "height"
+>
+
+export interface IconRendererProps
+  extends IconRendererSvgProps {
+  /** Reference: "lucide:coffee", "heroicons:home", "custom:my-logo" */
   icon: string
-  /** Affiché si l'icône est introuvable ou le format invalide. */
+  /** Rendered when the icon is not found or the format is invalid. */
   fallback?: ReactNode
-  className?: string
-  style?: CSSProperties
+  /** Shorthand that sets both width and height. Explicit width/height win. */
+  size?: string | number
   width?: string | number
   height?: string | number
-  color?: string
-  onClick?: MouseEventHandler<SVGElement>
-  "aria-hidden"?: boolean
-  "aria-label"?: string
 }
 
-export function IconRenderer({ icon, fallback = null, ...props }: IconRendererProps) {
+export function IconRenderer({
+  icon,
+  fallback = null,
+  size,
+  ...props
+}: IconRendererProps) {
   const resolved = resolveIcon(icon)
+  const dimensions = size === undefined ? {} : { width: size, height: size }
 
   if (resolved.status === "iconify") {
-    return <IconifyIcon icon={resolved.icon} {...props} />
+    return <IconifyIcon icon={resolved.icon} {...dimensions} {...props} />
   }
 
   if (resolved.status === "custom") {
     const Component = resolved.component
-    return <Component {...props} />
+    return <Component {...dimensions} {...props} />
   }
 
   if (import.meta.env.DEV) {
     console.warn(
-      `[IconRenderer] Icône "${icon}" ${
-        resolved.status === "invalid" ? "invalide (format attendu: provider:name)" : "introuvable"
+      `[IconRenderer] Icon "${icon}" ${
+        resolved.status === "invalid" ? "invalid (expected format: provider:name)" : "not found"
       }.`
     )
   }
