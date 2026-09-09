@@ -1,0 +1,46 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "react-input-icon",
+  "homepage": "https://github.com/golden-gab/react-input-icon",
+  "items": [
+    {
+      "name": "icon-picker",
+      "type": "registry:block",
+      "title": "Icon Picker",
+      "description": "Composable icon picker and renderer for React, powered by Iconify and Fuse.js.",
+      "dependencies": [
+        "@iconify/react",
+        "@iconify-json/lucide",
+        "@iconify-json/heroicons",
+        "fuse.js"
+      ],
+      "registryDependencies": ["button", "popover", "command"],
+      "files": [
+        {
+          "path": "src/components/icon-picker.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/components/icon-renderer.tsx",
+          "type": "registry:component"
+        },
+        {
+          "path": "src/hooks/use-icon-picker.ts",
+          "type": "registry:hook"
+        },
+        {
+          "path": "src/lib/icon-catalog.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "src/lib/resolve-icon.ts",
+          "type": "registry:lib"
+        },
+        {
+          "path": "src/lib/custom-icons.ts",
+          "type": "registry:lib"
+        }
+      ]
+    }
+  ]
+}
