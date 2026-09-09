@@ -7,11 +7,11 @@ export type ResolvedIcon =
   | { status: "invalid"; ref: string }
 
 /**
- * Résout une référence "provider:name" :
+ * Resolves a "provider:name" reference:
  * - "lucide:coffee"   → iconify
  * - "heroicons:home"  → iconify
- * - "custom:my-logo"  → custom (si enregistré), else not-found
- * - format invalide   → invalid
+ * - "custom:my-logo"  → custom (if registered), else not-found
+ * - invalid format    → invalid
  */
 export function resolveIcon(ref: string): ResolvedIcon {
   const separatorIndex = ref.indexOf(":")
@@ -26,11 +26,11 @@ export function resolveIcon(ref: string): ResolvedIcon {
     return component ? { status: "custom", component } : { status: "not-found", ref }
   }
 
-  // lucide, heroicons, ou tout autre prefix Iconify valide → délégué à Iconify
+  // lucide, heroicons, or any other valid Iconify prefix → delegated to Iconify
   return { status: "iconify", icon: ref }
 }
 
-/** Extrait le provider d'une référence, ex: "lucide:coffee" → "lucide" */
+/** Extracts the provider from a reference, e.g. "lucide:coffee" → "lucide" */
 export function getProviderFromRef(ref: string): string {
   const separatorIndex = ref.indexOf(":")
   return separatorIndex === -1 ? "" : ref.slice(0, separatorIndex)
