@@ -1,7 +1,7 @@
 {
-  "name": "react-input-icon",
-  "private": true,
-  "version": "0.0.0",
+  "name": "react-icon-input",
+  "private": false,
+  "version": "0.2.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
