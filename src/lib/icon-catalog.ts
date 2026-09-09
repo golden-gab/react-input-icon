@@ -41,5 +41,5 @@ export function getIconCatalog(providers: IconProvider[] = ["lucide", "heroicons
 export const providerLabels: Record<IconProvider, string> = {
   lucide: "Lucide",
   heroicons: "Heroicons",
-  custom: "Personnalisées",
+  custom: "Custom",
 }
