@@ -1,40 +1,41 @@
 # react-input-icon
 
-Un système composable de sélection et de rendu d'icônes pour React — pas un package npm, mais des composants à copier directement dans ton projet (esprit shadcn/ui).
+A composable icon selection and rendering system for React, distributed as a shadcn registry component (styled in the spirit of shadcn/ui).
 
-Choisis une icône depuis Lucide, Heroicons, ou tes propres SVG, stocke une simple référence texte (`"lucide:coffee"`), et affiche-la n'importe où avec `<IconRenderer />`.
+Choose an icon from Lucide, Heroicons, or your own SVGs, store a simple text reference (`"lucide:coffee"`), and display it anywhere with `<IconRenderer />`.
 
-## Pourquoi
+## Why
 
-- **Une référence, plusieurs sources** : `"lucide:coffee"`, `"heroicons:home"`, `"custom:mon-logo"` — un format unique stocké en base, peu importe d'où vient l'icône.
-- **Composable, pas configurable à l'excès** : trois briques indépendantes (`resolveIcon`, `useIconPicker`, `<IconPicker />`) que tu peux recombiner à ta façon plutôt qu'un composant à 40 props.
-- **Zéro dépendance cachée à l'exécution** : les catalogues d'icônes sont bundlés localement (`@iconify-json/*`), pas d'appel réseau pour lister les icônes.
+- **One reference, multiple sources**: `"lucide:coffee"`, `"heroicons:home"`, `"custom:mon-logo"` — one format stored in the database, no matter where the icon comes from.
+- **Composable, not over-configured**: three independent building blocks (`resolveIcon`, `useIconPicker`, `<IconPicker />`) you can recombine your way rather than a 40-prop component.
+- **Zero hidden runtime dependencies**: icon catalogs are bundled locally (`@iconify-json/*`), no network call to list icons.
 
-## Prérequis
+## Prerequisites
 
 - React + TypeScript
 - Tailwind CSS
-- shadcn/ui (base **Base UI**)
+- A project already initialized with shadcn/ui (`npx shadcn@latest init`)
 
 ## Installation
 
 ```bash
-npm install @iconify/react @iconify-json/lucide @iconify-json/heroicons fuse.js
-npx shadcn@latest add popover command button skeleton
+npx shadcn@latest add golden-gab/react-input-icon/icon-picker
 ```
 
-Puis copie les fichiers suivants dans ton projet :
+The CLI copies the picker, renderer, hook and helpers into your project:
 
 ```
-src/lib/custom-icons.ts
-src/lib/resolve-icon.ts
-src/lib/icon-catalog.ts
-src/hooks/use-icon-picker.ts
-src/components/icon-renderer.tsx
-src/components/icon-picker.tsx
+components/icon-picker.tsx
+components/icon-renderer.tsx
+hooks/use-icon-picker.ts
+lib/icon-catalog.ts
+lib/resolve-icon.ts
+lib/custom-icons.ts
 ```
 
-## Démarrage rapide
+It also installs the npm dependencies (`@iconify/react`, Iconify icon data sets, `fuse.js`) and the shadcn/ui base components used internally (`button`, `popover`, `command`) automatically.
+
+## Quick start
 
 ```tsx
 import { useState } from "react"
@@ -47,11 +48,11 @@ export default function Example() {
 }
 ```
 
-`icon` est une simple string (`"lucide:coffee"`) — c'est exactement ce que tu stockes en base de données.
+`icon` is a plain string (`"lucide:coffee"`) — exactly what you store in the database.
 
 ## `<IconRenderer />`
 
-Affiche une icône à partir de sa référence.
+Renders an icon from its reference.
 
 ```tsx
 import { IconRenderer } from "@/components/icon-renderer"
@@ -61,15 +62,21 @@ import { IconRenderer } from "@/components/icon-renderer"
 <IconRenderer icon="heroicons:academic-cap-solid" />
 <IconRenderer icon="custom:mon-logo" />
 
-// Icône introuvable ou référence invalide → fallback
+// Icon not found or invalid reference → fallback
 <IconRenderer icon="lucide:icone-inexistante" fallback={<span>?</span>} />
 ```
 
-Props disponibles : `className`, `style`, `width`, `height`, `color`, `onClick`, `aria-hidden`, `aria-label`, `fallback`.
+`IconRenderer` also forwards SVG props (`className`, `style`, `fill`, `strokeWidth`, `onClick`, `aria-label`, ...) to the underlying icon.
 
-## Icônes personnalisées
+| Prop | Type | Description |
+| --- | --- | --- |
+| `icon` | `string` | Icon reference such as `"lucide:coffee"` or `"custom:mon-logo"`. |
+| `fallback` | `ReactNode` | Rendered when the icon is not found or the reference is invalid. |
+| `size` | `string \| number` | Shorthand that sets both `width` and `height`. Explicit `width`/`height` props take precedence. |
 
-Enregistre tes propres composants SVG avant de les référencer :
+## Custom icons
+
+Register your own SVG components before referencing them:
 
 ```tsx
 import { registerCustomIcon, registerCustomIcons } from "@/lib/custom-icons"
@@ -80,34 +87,34 @@ function MonLogo(props: React.SVGProps<SVGSVGElement>) {
 
 registerCustomIcon("mon-logo", MonLogo)
 
-// ou plusieurs à la fois
+// or several at once
 registerCustomIcons({
   "mon-logo": MonLogo,
   "autre-icone": AutreIcone,
 })
 ```
 
-Ensuite : `<IconRenderer icon="custom:mon-logo" />`.
+Then: `<IconRenderer icon="custom:mon-logo" />`.
 
 ## `useIconPicker()`
 
-Logique pure de recherche/sélection, sans dépendance UI. Utile si tu veux construire ta propre interface de sélection.
+Pure search/selection logic with no UI dependency. Useful if you want to build your own selection interface.
 
 ```tsx
 import { useIconPicker } from "@/hooks/use-icon-picker"
 
 const {
-  query,           // texte de recherche actuel
-  setQuery,        // met à jour la recherche
-  filteredIcons,   // résultats filtrés (fuzzy search + provider actifs)
-  selectedIcon,    // référence sélectionnée
-  select,          // sélectionne une icône
-  clear,           // réinitialise la sélection
-  providers,       // liste des providers configurés
-  activeProviders, // providers actuellement affichés
-  toggleProvider,  // active/désactive un provider
+  query,           // current search text
+  setQuery,        // updates the search
+  filteredIcons,   // filtered results (fuzzy search + active providers)
+  selectedIcon,    // selected reference
+  select,          // selects an icon
+  clear,           // resets the selection
+  providers,       // list of configured providers
+  activeProviders, // providers currently displayed
+  toggleProvider,  // enables/disables a provider
 } = useIconPicker({
-  providers: ["lucide", "heroicons", "custom"], // défaut: ["lucide", "heroicons"]
+  providers: ["lucide", "heroicons", "custom"], // default: ["lucide", "heroicons"]
   initialValue: "lucide:coffee",
   maxResults: 60,
 })
@@ -115,29 +122,73 @@ const {
 
 ## `<IconPicker />`
 
-L'interface par défaut : un bouton qui ouvre un popover avec recherche, filtres par provider, et grille d'icônes.
+The default interface: a button that opens a popover with search, provider filters, and an icon grid.
 
 ```tsx
 <IconPicker
   value={icon}
   onChange={setIcon}
   providers={["lucide", "heroicons", "custom"]}
-  placeholder="Choisir une icône"
+  placeholder="Choose an icon"
 />
 ```
 
-Les badges de filtrage par provider n'apparaissent que si plusieurs providers sont configurés.
+Provider filter badges only appear when several providers are configured.
 
-## Accessibilité
+The picker is usable in both controlled and uncontrolled modes:
 
-Basé sur `Popover` et `Command` (shadcn/ui + Base UI) : navigation clavier complète, gestion du focus, `Escape` pour fermer — géré nativement, rien à ajouter. Les badges de filtre par provider exposent leur état via `aria-pressed`.
+```tsx
+// Uncontrolled
+<IconPicker defaultValue="lucide:coffee" onChange={setIcon} />
 
-## Limites connues (scope volontaire)
+// Controlled + customized
+<IconPicker
+  value={icon}
+  onChange={setIcon}
+  providers={["lucide", "heroicons", "custom"]}
+  maxResults={30}
+  disabled={saving}
+  placeholder="Choose an icon"
+  searchPlaceholder="Search icons..."
+  emptyContent="No icon matches your search."
+  triggerClassName="w-56 justify-between"
+  contentClassName="w-80"
+  iconClassName="size-6"
+/>
+```
 
-- Pas de catégories/taxonomie d'icônes
-- Pas de recherche par tags sémantiques (uniquement sur le nom)
-- Pas de virtualisation de la grille (inutile à l'échelle de Lucide + Heroicons)
-- Providers supportés : Lucide, Heroicons, + tes icônes custom
+### Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `value` | `string` | — | Selected icon reference (controlled mode). |
+| `defaultValue` | `string` | `""` | Initial icon reference (uncontrolled mode). |
+| `onChange` | `(icon: string) => void` | — | Called when an icon is selected. |
+| `open` | `boolean` | — | Popover open state (controlled mode). |
+| `defaultOpen` | `boolean` | `false` | Initial popover open state (uncontrolled mode). |
+| `onOpenChange` | `(open: boolean) => void` | — | Called when the popover opens or closes. |
+| `disabled` | `boolean` | `false` | Disables the trigger button. |
+| `providers` | `IconProvider[]` | `["lucide", "heroicons"]` | Icon providers available in the picker. |
+| `maxResults` | `number` | `60` | Maximum number of icons displayed. |
+| `placeholder` | `string` | `"Choose an icon"` | Aria label of the trigger when no icon is selected. |
+| `searchPlaceholder` | `string` | `"Search icons..."` | Placeholder of the search input. |
+| `emptyContent` | `ReactNode` | `"No icons found."` | Content shown when the search returns no results. |
+| `triggerClassName` | `string` | — | Extra classes for the trigger button. |
+| `contentClassName` | `string` | — | Extra classes for the popover content. |
+| `inputClassName` | `string` | — | Extra classes for the search input. |
+| `gridClassName` | `string` | — | Extra classes for the icon grid. |
+| `iconClassName` | `string` | — | Extra classes applied to every icon in the grid. |
+
+## Accessibility
+
+Built on `Popover` and `Command` (shadcn/ui + Base UI): full keyboard navigation, focus management, `Escape` to close — handled natively, nothing to add. Provider filter badges expose their state via `aria-pressed`.
+
+## Known limitations (deliberate scope)
+
+- No icon categories/taxonomy
+- No semantic tag search (name only)
+- No grid virtualization (unnecessary at the Lucide + Heroicons scale)
+- Supported providers: Lucide, Heroicons, plus your custom icons
 
 ## Stack
 
