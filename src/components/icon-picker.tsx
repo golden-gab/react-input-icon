@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import {
     useIconPicker,
     type UseIconPickerOptions,
@@ -21,22 +21,60 @@ import {
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export interface IconPickerProps extends Pick<
-    UseIconPickerOptions,
-    "providers"
-> {
+export interface IconPickerProps
+    extends Pick<UseIconPickerOptions, "providers" | "maxResults"> {
+    /** Selected icon reference (controlled mode). */
     value?: string;
+    /** Initial icon reference when the picker is uncontrolled. */
+    defaultValue?: string;
+    /** Called when an icon is selected. */
     onChange?: (icon: string) => void;
+    /** Popover open state (controlled mode). */
+    open?: boolean;
+    /** Initial popover open state when uncontrolled. */
+    defaultOpen?: boolean;
+    /** Called when the popover opens or closes. */
+    onOpenChange?: (open: boolean) => void;
+    /** Disables the trigger button. */
+    disabled?: boolean;
+    /** Label used as the trigger's aria-label when no icon is selected. */
     placeholder?: string;
+    /** Placeholder shown in the search input. */
+    searchPlaceholder?: string;
+    /** Content shown when no icon matches the current query. */
+    emptyContent?: ReactNode;
+    /** Extra classes for the trigger button. */
+    triggerClassName?: string;
+    /** Extra classes for the popover content. */
+    contentClassName?: string;
+    /** Extra classes for the search input. */
+    inputClassName?: string;
+    /** Extra classes for the icon grid. */
+    gridClassName?: string;
+    /** Extra classes applied to every icon in the grid. */
+    iconClassName?: string;
 }
 
 export function IconPicker({
     value,
+    defaultValue = "",
     onChange,
+    open,
+    defaultOpen = false,
+    onOpenChange,
+    disabled,
     providers,
-    placeholder = "Choisir une icône",
+    maxResults,
+    placeholder = "Choose an icon",
+    searchPlaceholder = "Search icons...",
+    emptyContent = "No icons found.",
+    triggerClassName,
+    contentClassName,
+    inputClassName,
+    gridClassName,
+    iconClassName,
 }: IconPickerProps) {
-    const [open, setOpen] = useState(false);
+    const [internalOpen, setInternalOpen] = useState(defaultOpen);
     const {
         query,
         setQuery,
@@ -46,24 +84,35 @@ export function IconPicker({
         providers: allProviders,
         activeProviders,
         toggleProvider,
-    } = useIconPicker({ providers, initialValue: value });
+    } = useIconPicker({
+        providers,
+        initialValue: value ?? defaultValue,
+        maxResults,
+    });
 
+    const isOpen = open ?? internalOpen;
     const current = value ?? selectedIcon;
+
+    function handleOpenChange(nextOpen: boolean) {
+        setInternalOpen(nextOpen);
+        onOpenChange?.(nextOpen);
+    }
 
     function handleSelect(ref: string) {
         select(ref);
         onChange?.(ref);
-        setOpen(false);
+        handleOpenChange(false);
     }
-    console.log(current);
+
     return (
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover open={isOpen} onOpenChange={handleOpenChange}>
             <PopoverTrigger
                 render={
                     <Button
                         variant="outline"
-                        className="h-9 "
+                        className={cn("h-9", triggerClassName)}
                         aria-label={placeholder}
+                        disabled={disabled}
                     />
                 }
             >
@@ -73,14 +122,18 @@ export function IconPicker({
                         <span>{current}</span>
                     </>
                 ) : (
-                    <span className="text-muted-foreground text-xs">?</span>
+                    <span className="text-muted-foreground text-xs">{placeholder}</span>
                 )}
             </PopoverTrigger>
 
-            <PopoverContent className="w-72 p-0" align="start">
+            <PopoverContent
+                className={cn("w-72 p-0", contentClassName)}
+                align="start"
+            >
                 <Command shouldFilter={false}>
                     <CommandInput
-                        placeholder="Rechercher une icône..."
+                        className={inputClassName}
+                        placeholder={searchPlaceholder}
                         value={query}
                         onValueChange={setQuery}
                     />
@@ -111,8 +164,13 @@ export function IconPicker({
                     )}
 
                     <CommandList>
-                        <CommandEmpty>Aucune icône trouvée.</CommandEmpty>
-                        <CommandGroup className="**:[[cmdk-group-items]]:grid **:[[cmdk-group-items]]:grid-cols-6 **:[[cmdk-group-items]]:gap-1 **:[[cmdk-group-items]]:p-2">
+                        <CommandEmpty>{emptyContent}</CommandEmpty>
+                        <CommandGroup
+                            className={cn(
+                                "**:[[cmdk-group-items]]:grid **:[[cmdk-group-items]]:grid-cols-6 **:[[cmdk-group-items]]:gap-1 **:[[cmdk-group-items]]:p-2",
+                                gridClassName,
+                            )}
+                        >
                             {filteredIcons.map((icon) => (
                                 <CommandItem
                                     key={icon.ref}
@@ -122,7 +180,7 @@ export function IconPicker({
                                 >
                                     <IconRenderer
                                         icon={icon.ref}
-                                        className="h-5 w-5"
+                                        className={cn("h-5 w-5", iconClassName)}
                                     />
                                 </CommandItem>
                             ))}
