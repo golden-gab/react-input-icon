@@ -4,6 +4,8 @@ A composable icon selection and rendering system for React, distributed as a sha
 
 Choose an icon from Lucide, Heroicons, or your own SVGs, store a simple text reference (`"lucide:coffee"`), and display it anywhere with `<IconRenderer />`.
 
+https://github.com/user-attachments/assets/773b9959-437d-42e1-9064-d850aa9cef47
+
 ## Why
 
 - **One reference, multiple sources**: `"lucide:coffee"`, `"heroicons:home"`, `"custom:mon-logo"` — one format stored in the database, no matter where the icon comes from.
