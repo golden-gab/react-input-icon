@@ -37,7 +37,7 @@ export function IconRenderer({
     return <Component {...dimensions} {...props} />
   }
 
-  if (import.meta.env.DEV) {
+  if (process.env.NODE_ENV !== "production") {
     console.warn(
       `[IconRenderer] Icon "${icon}" ${
         resolved.status === "invalid" ? "invalid (expected format: provider:name)" : "not found"
